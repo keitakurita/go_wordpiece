@@ -62,7 +62,7 @@ func TestBertWordPieceTokenize(t *testing.T) {
         {"adfvadfjifeakdjf", []string {"ad", "##f", "##va", "##df", "##ji", "##fe", "##ak", "##d", "##j", "##f"}},
     }
 
-    vocab := LoadVocab("/projects/tir3/users/kkurita/WeightPoisoning/bert-base-uncased-vocab.txt")
+    vocab := LoadVocab("./resources/bert-base-uncased-vocab.txt")
     for _, c := range cases {
         found := WordPieceTokenize(c.input, vocab, "[UNK]", true)
         if !reflect.DeepEqual(found, c.expected) {
