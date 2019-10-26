@@ -3,6 +3,7 @@ package wordpiece
 import (
     "testing"
     "reflect"
+    "strings"
 )
 
 func TestBasicTokenizeSimple(t *testing.T) {
@@ -31,6 +32,7 @@ func TestWordPieceTokenize(t *testing.T) {
         {"Helloworld, from go.", []string {"hello", "[UNK]", ",", "[UNK]", "go", "."}},
         {"Hello fromgo.", []string {"hello", "[UNK]", "."}},
         {"Hello worldgo.", []string {"hello", "world", "##go", "."}},
+        {strings.Repeat("go", 51), []string {"[UNK]"}},
     }
 
     vocab := map[string]int{
@@ -57,6 +59,7 @@ func TestBertWordPieceTokenize(t *testing.T) {
         {"This is a pen", []string {"this", "is", "a", "pen"}},
         {"This, i-s a pen!!", []string {"this", ",", "i", "-", "s", "a", "pen", "!", "!"}},
         {"penguins are flightless birds", []string {"penguins", "are", "flight", "##less", "birds"}},
+        {"adfvadfjifeakdjf", []string {"ad", "##f", "##va", "##df", "##ji", "##fe", "##ak", "##d", "##j", "##f"}},
     }
 
     vocab := LoadVocab("/projects/tir3/users/kkurita/WeightPoisoning/bert-base-uncased-vocab.txt")

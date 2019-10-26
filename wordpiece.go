@@ -4,9 +4,14 @@ import (
     "bufio"
     "log"
     "strings"
+    "io"
     "os"
     "unicode"
+    "golang.org/x/text/transform"
+    "golang.org/x/text/unicode/norm"
 )
+
+const MaxTokenLen = 100
 
 
 func LoadVocab(path string) map[string]int {
@@ -31,24 +36,32 @@ func whitespace_tokenize(s string) []string {
     return strings.Fields(strings.TrimSpace(s))
 }
 
-func isMn(r rune) bool { return unicode.Is(unicode.Mn, r) }
-
 func clean(token string, do_lower_case bool) string {
     if do_lower_case {
         token = strings.ToLower(token)
     }
     var sb strings.Builder
     for _, c := range token {
-        // TODO: handle control chars
-        // TODO: convert whitespaces to ' '
-        if !(c == 0 || c == 0xfffd) {
+        if unicode.IsSpace(c) {
+            sb.WriteRune(' ')
+        } else if unicode.Is(unicode.Mn, c) {
+            // skip accented characters
+        } else if (c == 0 || c == 0xfffd || unicode.IsControl(c)) {
+            // skip control characters 
+        } else {
             sb.WriteRune(c)
         }
     }
     token = sb.String()
-    //return norm.NFC(transform.RemoveFunc(isMn)(norm.NFD(token)))
-    // TODO: Clean accents
     return token
+}
+
+/**
+* Reads in data while normalizing unicode
+*/
+func NormalizedReader(r io.Reader) io.Reader {
+    t := transform.Chain(norm.NFD, norm.NFC)
+    return transform.NewReader(r, t)
 }
 
 func _split_on_punc(text string) []string {
@@ -92,7 +105,7 @@ func in_vocab(token string, vocab map[string] int) bool {
 
 func subword_tokenize(token string, vocab map[string]int, unk_token string) []string {
     var sub_tokens []string
-    if len(token) > 100 {
+    if len(token) > MaxTokenLen {
         sub_tokens = append(sub_tokens, unk_token)
         return sub_tokens
     }
